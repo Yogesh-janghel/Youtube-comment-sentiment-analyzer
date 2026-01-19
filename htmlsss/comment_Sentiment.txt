@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Comment Sentiment Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-black text-white">
+    <header class="bg-gray-800 p-4 flex justify-between items-center">
+        <div class="flex items-center">
+            <i class="fas fa-chart-line text-white text-2xl mr-2"></i>
+            <span class="text-white text-xl font-semibold">YouTubeCommentSentiment</span>
+        </div>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="#" class="text-white">Home</a></li>
+                <li><a href="#" class="text-white">About</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="flex flex-col items-center justify-center min-h-screen">
+        <h1 class="text-4xl font-bold mb-2">YouTube Comment Sentiment Analysis</h1>
+        <p class="text-lg mb-8">Analyze the sentiment of YouTube comments</p>
+        <div class="w-full max-w-md">
+            <div class="bg-gray-800 p-4 rounded-lg mb-4">
+                <h2 class="text-2xl font-semibold mb-2">Highlighted Comment:</h2>
+                <p class="bg-gray-700 p-4 rounded-lg mb-4">This is a sample comment for sentiment analysis.</p>
+                <h3 class="text-xl font-semibold mb-2">Sentiment: <span class="text-green-500">Positive</span></h3>
+                <h3 class="text-xl font-semibold">Score: <span class="text-green-500">0.85</span></h3>
+            </div>
+            <button class="w-full p-4 bg-blue-500 text-white rounded-full">Generate for Another Comment</button>
+        </div>
+    </main>
+</body>
+</html>

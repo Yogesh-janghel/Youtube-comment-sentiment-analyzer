@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Sentiment Result</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Additional custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .positive-bg {
+            background-color: #e6ffe6;
+        }
+
+        .neutral-bg {
+            background-color: #ffffe6;
+        }
+
+        .negative-bg {
+            background-color: #ffe6e6;
+        }
+
+        .card {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .btn-primary {
+            background-color: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .word-cloud img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body class="{% if sentiment_label == 'Positive' %}positive-bg{% elif sentiment_label == 'Neutral' %}neutral-bg{% else %}negative-bg{% endif %} text-gray-900">
+    <!-- Navbar -->
+    <nav class="bg-gray-800 p-6 flex justify-between items-center shadow-xl">
+        <div class="flex items-center space-x-4">
+            <img src="static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
+            <span class="text-2xl font-bold text-white tracking-wide">YouTube Comment Sentiment Analyzer</span>
+        </div>
+        <div class="flex space-x-6 text-lg font-semibold text-gray-300">
+            <a href="/" class="hover:text-red-500 transition duration-200">Home</a>
+            <a href="/how_it_works" class="hover:text-red-500 transition duration-200">How It Works</a>
+            <a href="/about" class="hover:text-red-500 transition duration-200">About</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex flex-col items-center justify-center min-h-screen bg-gray-100 py-8">
+        <h1 class="text-5xl font-extrabold mb-6 text-center text-gray-800">Sentiment Analysis Result</h1>
+
+        <!-- Sentiment Card -->
+        <div class="card rounded-lg p-8 mb-10 {% if sentiment == 'Positive' %}bg-green-500{% elif sentiment == 'Neutral' %}bg-yellow-500{% else %}bg-red-500{% endif %}">
+            <h2 class="text-3xl font-semibold text-center mb-4 text-white">The sentiment of the comment is:</h2>
+            <div class="flex flex-col md:flex-row items-center justify-center space-x-0 md:space-x-6 space-y-4 md:space-y-0">
+                <span class="text-6xl">
+                    {% if sentiment_label == 'Positive' %}
+                        😊
+                    {% elif sentiment_label == 'Neutral' %}
+                        😐
+                    {% else %}
+                        😞
+                    {% endif %}
+                </span>
+                <p class="text-4xl font-bold text-white">{{ sentiment_label }}</p>
+            </div>
+        </div>
+
+        <!-- Original Comment -->
+        <div class="card rounded-lg p-6 bg-gray-800 text-lg shadow-md w-full max-w-xl mb-6">
+            <p class="font-semibold text-white">Original Comment:</p>
+            <p class="mt-2 text-gray-300"><strong>{{ original_comment }}</strong></p>
+        </div>
+
+        <!-- Sentiment Score -->
+        <div class="card rounded-lg p-6 bg-gray-800 text-lg shadow-md w-full max-w-xl mb-6">
+            <p class="font-semibold text-white">Sentiment Score:</p>
+            <p class="mt-2 text-gray-300"><strong>{{ sentiment_score }}</strong></p>
+        </div>
+
+        <!-- Sentiment Distribution -->
+        <div class="card rounded-lg p-6 bg-gray-800 text-lg shadow-md w-full max-w-xl mb-6">
+            <p class="font-semibold text-white">Sentiment Distribution:</p>
+            <ul class="mt-2 text-gray-300">
+                <li>Negative: <strong>{{ sentiment_distribution[0] }}</strong></li>
+                <li>Neutral: <strong>{{ sentiment_distribution[1] }}</strong></li>
+                <li>Positive: <strong>{{ sentiment_distribution[2] }}</strong></li>
+            </ul>
+        </div>
+
+        <!-- Word Cloud -->
+        <div class="word-cloud card rounded-lg p-6 bg-gray-800 text-lg shadow-md w-full max-w-xl mb-6">
+            <p class="font-semibold text-white">Word Cloud:</p>
+            <div class="mt-4">
+                <img src="{{ wordcloud_image }}" alt="Word Cloud" />
+            </div>
+        </div>
+
+        <!-- Analyze Another Button -->
+        <a href="/" class="btn-primary mt-10 shadow-md">Analyze Another Comment</a>
+    </main>
+</body>
+</html>
