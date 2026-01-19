@@ -7,88 +7,117 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white">
-    <header class="bg-gray-800 p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <i class="fas fa-chart-line text-white text-2xl mr-2"></i>
-            <span class="text-white text-xl font-semibold">YouTubeCommentSentiment</span>
+    <nav class="bg-gray-800 p-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <img src="../static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
+            <span class="text-2xl font-bold">YouTube Comment Sentiment Analyzer</span>
         </div>
-        <nav>
-            <ul class="flex space-x-4">
-                <li><a href="/" class="text-white">Home</a></li>
-                <li><a href="/how_it_works" class="text-white">How It Works</a></li>
-                <li><a href="/about" class="text-white">About</a></li>
-            </ul>
-        </nav>
-    </header>
+        <div class="flex space-x-8 text-lg font-semibold ml-auto">
+            <a href="/" class="hover:text-red-500 hover:underline transition duration-200">Home</a>
+            <a href="/how_it_works" class="hover:text-red-500 hover:underline transition duration-200">How It Works</a>
+            <a href="/about" class="hover:text-red-500 hover:underline transition duration-200">About</a>
+        </div>
+    </nav>
     <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-8 text-center">YouTube Video Sentiment Analysis</h1>
-        
-        <div class="bg-gray-800 rounded-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Overall Sentiment</h2>
-            <p class="text-3xl font-bold text-center {% if sentiment == 'Positive' %}text-green-500{% elif sentiment == 'Neutral' %}text-yellow-500{% else %}text-red-500{% endif %}">
-                {{ sentiment }}
-            </p>
+        <h1 class="text-4xl font-bold mb-8 text-center text-red-600 transition-transform duration-300 hover:scale-105">
+            YouTube Video Sentiment Analysis
+        </h1>
+             
+        <div class="rounded-lg p-6 mb-8 {% if sentiment == 'Positive' %}bg-green-500{% elif sentiment == 'Neutral' %}bg-yellow-500{% else %}bg-red-500{% endif %}">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Overall Sentiment</h2>
+            <div class="flex items-center justify-center space-x-4">
+                <span class="text-6xl">
+                    {% if sentiment == 'Positive' %}
+                        😊
+                    {% elif sentiment == 'Neutral' %}
+                        😐
+                    {% else %}
+                        😞
+                    {% endif %}
+                </span>
+                <p class="text-4xl font-bold text-white">
+                    {{ sentiment }}
+                </p>
+            </div>
         </div>
 
-         <!-- Display video title and link -->
-         <div class="bg-gray-800 rounded-lg p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Video Title</h2>
-
-            <p class="text-xl font-bold text-center">{{ video_title }}</p>
-            <div class="w-full max-w-md mx-auto mt-4">
+        <!-- Display video title and link -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-8 shadow-lg">
+            <p class="text-3xl font-bold text-center text-gray-300 mb-4">{{ video_title }}</p>
+            <div class="w-full max-w-2xl mx-auto mt-6">
                 <iframe 
+                    class="rounded-lg shadow-md"
                     width="100%" 
-                    height="315" 
-                    src="https://www.youtube.com/embed/{{video_id}}" 
+                    height="360" 
+                    src="https://www.youtube.com/embed/{{ video_id }}" 
                     frameborder="0" 
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                     allowfullscreen>
                 </iframe>
             </div>
-            
-
         </div>
-        
+
         <!-- Display graphs -->
-        <div class="mt-8">
-            <h2 class="text-xl font-semibold mb-4">Distribution of Comment Likes</h2>
-            <img src="{{ like_dist_image }}" alt="Distribution of Likes" class="w-full max-w-md mb-8">
-            
-            <h2 class="text-xl font-semibold mb-4">Correlation Between Comment Length and Likes</h2>
-            <img src="{{ comment_corr_image }}" alt="Comment Length vs Likes" class="w-full max-w-md mb-8">
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Sentiment Distribution</h2>
+                <img src="{{ sentiment_dist_image }}" alt="Sentiment Distribution" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Comment Activity Over Time</h2>
-            <img src="{{ comment_activity_image }}" alt="Comment Activity Over Time" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Distribution of Comment Likes</h2>
+                <img src="{{ like_dist_image }}" alt="Distribution of Likes" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Top 10 Most Active Authors</h2>
-            <img src="{{ top_authors_image }}" alt="Top 10 Most Active Authors" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Correlation Between Comment Length and Likes</h2>
+                <img src="{{ comment_corr_image }}" alt="Comment Length vs Likes" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Distribution of Comment Lengths</h2>
-            <img src="{{ comment_length_dist_image }}" alt="Distribution of Comment Lengths" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Comment Activity Over Time</h2>
+                <img src="{{ comment_activity_image }}" alt="Comment Activity Over Time" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Comment Activity by Hour</h2>
-            <img src="{{ comment_activity_by_hour_image }}" alt="Comment Activity by Hour" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Top 10 Most Active Authors</h2>
+                <img src="{{ top_authors_image }}" alt="Top 10 Most Active Authors" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Most Common Words in Comments</h2>
-            <img src="{{ wordcloud_image }}" alt="Most Common Words in Comments" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Distribution of Comment Lengths</h2>
+                <img src="{{ comment_length_dist_image }}" alt="Distribution of Comment Lengths" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Comment Activity Heatmap</h2>
-            <img src="{{ comment_activity_heatmap_image }}" alt="Comment Activity Heatmap" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Comment Activity by Hour</h2>
+                <img src="{{ comment_activity_by_hour_image }}" alt="Comment Activity by Hour" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Likes Over Time</h2>
-            <img src="{{ likes_over_time_image }}" alt="Likes Over Time" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Most Common Words in Comments</h2>
+                <img src="{{ wordcloud_image }}" alt="Most Common Words in Comments" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
 
-            <h2 class="text-xl font-semibold mb-4">Sentiment Distribution</h2>
-            <img src="{{ sentiment_dist_image }}" alt="Sentiment Distribution" class="w-full max-w-md mb-8">
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Comment Activity Heatmap</h2>
+                <img src="{{ comment_activity_heatmap_image }}" alt="Comment Activity Heatmap" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
+
+            <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <h2 class="text-xl font-semibold mb-4 text-center">Likes Over Time</h2>
+                <img src="{{ likes_over_time_image }}" alt="Likes Over Time" class="w-full max-w-md mx-auto mb-2 rounded-md shadow-lg">
+            </div>
         </div>
+
         <!-- Display top positive comments -->
         <div class="bg-gray-800 rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold mb-4">Top 5 Most Liked Positive Comments</h2>
-            <ul>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% for comment in top_positive_comments %}
-                    <li class="mb-4">
-                        <p class="text-lg">{{ comment.text }}</p>
-                        <p class="text-sm text-gray-400">Likes: {{ comment.like_count }}</p>
+                    <li class="bg-green-600 rounded-lg p-4 transition-transform transform hover:scale-105 mb-4">
+                        <p class="text-lg text-white font-bold">{{ comment.text }}</p>
+                        <p class="text-sm text-gray-200">Likes: {{ comment.like_count }}</p>
                     </li>
                 {% endfor %}
             </ul>
@@ -97,11 +126,11 @@
         <!-- Display top negative comments -->
         <div class="bg-gray-800 rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-semibold mb-4">Top 5 Most Liked Negative Comments</h2>
-            <ul>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% for comment in top_negative_comments %}
-                    <li class="mb-4">
-                        <p class="text-lg">{{ comment.text }}</p>
-                        <p class="text-sm text-gray-400">Likes: {{ comment.like_count }}</p>
+                    <li class="bg-red-600 rounded-lg p-4 transition-transform transform hover:scale-105 mb-4">
+                        <p class="text-lg text-white font-bold">{{ comment.text }}</p>
+                        <p class="text-sm text-gray-200">Likes: {{ comment.like_count }}</p>
                     </li>
                 {% endfor %}
             </ul>

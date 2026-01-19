@@ -8,19 +8,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body class="bg-black text-white">
-    <header class="bg-gray-800 p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <i class="fas fa-chart-line text-white text-2xl mr-2"></i>
-            <span class="text-white text-xl font-semibold">YouTubeCommentSentiment</span>
+    <nav class="bg-gray-800 p-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <img src="../static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
+            <span class="text-2xl font-bold">YouTube Comment Sentiment Analyzer</span>
         </div>
-        <nav>
-            <ul class="flex space-x-4">
-                <li><a href="/" class="text-white">Home</a></li>
-                <li><a href="/how_it_works" class="text-white">How It Works</a></li>
-                <li><a href="/about" class="text-white">About</a></li>
-            </ul>
-        </nav>
-    </header>
+        <div class="flex space-x-8 text-lg font-semibold ml-auto">
+            <a href="/" class="hover:text-red-500 hover:underline transition duration-200">Home</a>
+            <a href="/how_it_works" class="hover:text-red-500 hover:underline transition duration-200">How It Works</a>
+            <a href="/about" class="hover:text-red-500 hover:underline transition duration-200">About</a>
+        </div>
+    </nav>
 
     <main class="flex flex-col items-center justify-center min-h-screen">
         <h1 class="text-4xl font-bold mb-4">How It Works</h1>

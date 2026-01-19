@@ -21,6 +21,7 @@ from langdetect import detect
 from googletrans import Translator
 import plotly.express as px
 import json
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -65,6 +66,7 @@ def submit_comment():
     
     # Get the predicted sentiment score and sentiment label (0, 1, 2)
     sentiment_score = np.argmax(lstm_pred)
+    confidence = lstm_pred[0][sentiment_score]
     
     if sentiment_score == 0:
         sentiment_label = "Negative"
@@ -73,8 +75,12 @@ def submit_comment():
     else:
         sentiment_label = "Positive"
     
-    # Pass sentiment prediction and score to comment.html
-    return render_template('comment.html', sentiment_label=sentiment_label, sentiment_score=lstm_pred[0][sentiment_score])
+    # Generate word cloud for the comment
+    wordcloud = WordCloud(width=400, height=200, background_color='white').generate(cleaned_comment)
+    wordcloud.to_file('static/images/comment_wordcloud.png')
+    
+    # Pass sentiment prediction, score, and word cloud to comment.html
+    return render_template('comment.html', sentiment_label=sentiment_label, sentiment_score=confidence, original_comment=comment, sentiment_distribution=lstm_pred[0], wordcloud_image='/static/images/comment_wordcloud.png')
 
 @app.route('/submit_url', methods=['POST'])
 def submit_url():
@@ -139,7 +145,7 @@ def last_fetch_fucn():
     except FileNotFoundError:
         return "No data available", 400
 
-    return render_template('youtube.html', sentiment=data['sentiment'], 
+    return render_template('last_fetch.html', sentiment=data['sentiment'], 
                            like_dist_image='/static/last_fetched/like_distribution.png',
                             comment_corr_image='/static/last_fetched/comment_length_vs_likes.png',
                             comment_activity_image='/static/last_fetched/comment_activity_over_time.png',
@@ -352,11 +358,27 @@ def calculate_overall_sentiment(df):
 
 # Function to prepare top comments based on sentiment
 def prepare_top_comments(df):
+    # Filter top positive comments
     top_positive_comments = df[df['sentiment'] == 2].nlargest(5, 'like_count')
+    # Filter top negative comments
     top_negative_comments = df[df['sentiment'] == 0].nlargest(5, 'like_count')
 
-    top_positive_comments_list = top_positive_comments[['text', 'like_count']].to_dict(orient='records')
-    top_negative_comments_list = top_negative_comments[['text', 'like_count']].to_dict(orient='records')
+    # Create lists with cleaned comments
+    top_positive_comments_list = []
+    for index, comment in top_positive_comments.iterrows():
+        # Remove HTML tags using BeautifulSoup
+        clean_text = BeautifulSoup(comment['text'], "html.parser").get_text()
+        # Remove extra whitespace and any unwanted characters
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()  # Replace multiple spaces with a single space
+        top_positive_comments_list.append({'text': clean_text, 'like_count': comment['like_count']})
+
+    top_negative_comments_list = []
+    for index, comment in top_negative_comments.iterrows():
+        # Remove HTML tags using BeautifulSoup
+        clean_text = BeautifulSoup(comment['text'], "html.parser").get_text()
+        # Remove extra whitespace and any unwanted characters
+        clean_text = re.sub(r'\s+', ' ', clean_text).strip()  # Replace multiple spaces with a single space
+        top_negative_comments_list.append({'text': clean_text, 'like_count': comment['like_count']})
 
     return top_positive_comments_list, top_negative_comments_list
                            

@@ -1,91 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Comment Sentiment Analysis</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Comment Sentiment</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Animation styles */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
-<body class="bg-black text-white">
-    <header class="bg-gray-800 p-4 flex justify-between items-center">
-        <div class="flex items-center">
-            <i class="fas fa-chart-line text-white text-2xl mr-2"></i>
-            <span class="text-white text-xl font-semibold">YouTubeCommentSentiment</span>
+
+<body class="bg-gray-900 text-white min-h-screen">
+    <nav class="bg-gray-800 p-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <img src="../static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
+            <span class="text-2xl font-bold">YouTube Comment Sentiment Analyzer</span>
         </div>
-        <nav>
-            <ul class="flex space-x-4">
-                <li><a href="/" class="text-white">Home</a></li>
-                <li><a href="/how_it_works" class="text-white">How It Works</a></li>
-                <li><a href="/about" class="text-white">About</a></li>
-            </ul>
-        </nav>
-    </header>
+        <div class="flex space-x-8 text-lg font-semibold ml-auto">
+            <a href="/" class="hover:text-red-500 hover:underline transition duration-200">Home</a>
+            <a href="/how_it_works" class="hover:text-red-500 hover:underline transition duration-200">How It Works</a>
+            <a href="/about" class="hover:text-red-500 hover:underline transition duration-200">About</a>
+        </div>
+    </nav>
 
-    <main class="flex flex-col items-center justify-center min-h-screen">
-        <h1 class="text-4xl font-bold mb-2">YouTube Comment Sentiment Analysis</h1>
-        <p class="text-lg mb-8">Analyze the sentiment of YouTube comments</p>
+    <!-- Main Content -->
+    <div id="main-content" class="flex flex-col items-center mt-10 space-y-8 w-full">
+        <!-- Comment Input with Submit Button (Side-by-Side) -->
+        <form action="/submit_comment" method="POST" class="w-3/4 flex items-center space-x-4">
+            <input type="text" name="comment" placeholder="Enter a comment for sentiment analysis" class="flex-grow p-4 bg-gray-700 text-white rounded-full focus:outline-none" />
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-8 py-4 rounded-full">Submit Comment</button>
+        </form>
 
-        <div class="w-full max-w-md">
-            <!-- Comment Form -->
-            <form action="/submit_comment" method="POST">
-                <div class="mb-4">
-                    <input type="text" name="comment" placeholder="Enter a comment for sentiment analysis" class="w-full p-4 mb-2 bg-gray-700 text-white rounded-full">
-                    <button type="submit" class="w-full p-4 bg-red-500 text-white rounded-full">Submit Comment</button>
-                </div>
-            </form>
-
-            <div class="w-full max-w-md">
-                <!-- YouTube URL Form -->
-                <form action="/submit_url" method="POST" class="w-full">
-                    <input type="text" name="youtube_url" placeholder="Paste YouTube video URL" class="w-full p-4 mb-2 bg-gray-700 text-white rounded-full">
-                    
-                    <!-- Slider for number of comments -->
-                    <label for="num_comments" class="block text-white mb-2">Number of Comments to Fetch:</label>
-                    <input type="range" id="num_comments" name="num_comments" min="10" max="3000" value="100" class="w-full mb-4">
-                    <span id="num_comments_value" class="text-white">100</span>
-
-                    <!-- Slider for minimum comment length -->
-                    <label for="min_comment_length" class="block text-white mb-2">Minimum Comment Length:</label>
-                    <input type="range" id="min_comment_length" name="min_comment_length" min="10" max="150" value="10" class="w-full mb-4">
-                    <span id="min_comment_length_value" class="text-white">10</span>
-
-                    <button type="submit" class="w-full p-4 bg-red-500 text-white rounded-full">Submit URL</button>
-                </form>
-            
-                <!-- Last fetch result -->
-                <form action="/last_fetched" method="POST" class="w-full mt-4">
-                    <button type="submit" class="w-full p-4 bg-red-500 text-white rounded-full">Last Fetched</button>
-                </form>
+        <form action="/submit_url" method="POST" class="w-3/4 space-y-8">
+            <!-- YouTube URL Input with Submit URL Button (Side-by-Side) -->
+            <div class="flex items-center space-x-4">
+                <input type="text" name="youtube_url" placeholder="Paste YouTube video URL"
+                    class="flex-grow p-4 rounded-full bg-gray-700 placeholder-gray-400 focus:outline-none" />
+                <button type="submit"
+                    class="bg-red-500 hover:bg-red-600 text-white font-semibold px-[53px] py-4 rounded-full">
+                    Submit URL
+                </button>
             </div>
-        </div>
+        
+            <!-- Slider Section (below the input) -->
+            <div class="w-full bg-gray-800 p-6 rounded-lg">
+                <div class="space-y-12">
+                    <!-- Number of Comments Slider -->
+                    <div>
+                        <label for="num_comments" class="block text-white mb-2">Number of Comments to Fetch:</label>
+                        <input type="range" id="num_comments" name="num_comments" min="10" max="3000" value="100"
+                            class="w-full mb-4">
+                        <span id="num_comments_value" class="text-white">100</span>
+                    </div>
+        
+                    <!-- Minimum Comment Length Slider -->
+                    <div>
+                        <label for="min_comment_length" class="block text-white mb-2">Minimum Comment Length:</label>
+                        <input type="range" id="min_comment_length" name="min_comment_length" min="10" max="150" value="10"
+                            class="w-full mb-4">
+                        <span id="min_comment_length_value" class="text-white">10</span>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
 
-        <!-- Loading Screen -->
-        <div id="loadingScreen" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center">
-            <img src="/static/images/spinner.svg" alt="Loading..." class="w-16 h-16">
-            <p class="text-white text-xl ml-4">Loading, please wait...</p>
-        </div>
 
-        <script>
-            // Show the loading screen when the form is submitted
-            const urlForm = document.querySelector('form[action="/submit_url"]');
-            urlForm.addEventListener('submit', function() {
-                document.getElementById('loadingScreen').classList.remove('hidden');
-            });
-            // Update slider values
-            const numCommentsSlider = document.getElementById('num_comments');
-            const numCommentsValue = document.getElementById('num_comments_value');
-            numCommentsSlider.oninput = function() {
-                numCommentsValue.textContent = this.value;
-            };
+        <!-- Last Fetched Button -->
+        <form action="/last_fetched" method="POST" class="w-3/4 flex justify-center mt-4">
+            <button class="bg-red-500 hover:bg-red-600 text-white font-bold px-10 py-5 rounded-full">
+                Last Fetched
+            </button>
+        </form>
 
-            const minCommentLengthSlider = document.getElementById('min_comment_length');
-            const minCommentLengthValue = document.getElementById('min_comment_length_value');
-            minCommentLengthSlider.oninput = function() {
-                minCommentLengthValue.textContent = this.value;
-            };
-        </script>
+        <!-- Additional Space Filling Section -->
+        <div class="w-3/4 flex-grow"></div>
+    </div>
+     <!-- Loading Screen -->
+    <div id="loadingScreen" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center min-h-screen">
+        <img src="/static/images/spinner.svg" alt="Loading..." class="w-16 h-16">
+        <p class="text-white text-xl ml-4">Loading, please wait...</p>
+    </div>
+    <script>
+        // Trigger fade-in animation when the page is loaded
+        window.addEventListener('load', function () {
+            document.getElementById('main-content').classList.add('fade-in');
+        });
+        // Show the loading screen when the form is submitted
+        const urlForm = document.querySelector('form[action="/submit_url"]');
+        urlForm.addEventListener('submit', function() {
+            document.getElementById('loadingScreen').classList.remove('hidden');
+        });
+        // Show the loading screen when the form is submitted
+        const urlForm1 = document.querySelector('form[action="/submit_comment"]');
+        urlForm1.addEventListener('submit', function() {
+            document.getElementById('loadingScreen').classList.remove('hidden');
+        });
 
-    </main>
+        // Hide the loading screen when the page is loaded
+        window.onload = function() {
+            document.getElementById('loadingScreen').classList.add('hidden');
+        };
+
+        // Update slider values
+        const numCommentsSlider = document.getElementById('num_comments');
+        const numCommentsValue = document.getElementById('num_comments_value');
+        numCommentsSlider.oninput = function() {
+            numCommentsValue.textContent = this.value;
+        };
+
+        const minCommentLengthSlider = document.getElementById('min_comment_length');
+        const minCommentLengthValue = document.getElementById('min_comment_length_value');
+        minCommentLengthSlider.oninput = function() {
+            minCommentLengthValue.textContent = this.value;
+        };
+    </script>
 </body>
+
 </html>
