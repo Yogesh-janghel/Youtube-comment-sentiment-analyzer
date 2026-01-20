@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, render_template, send_file
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.models import load_model
 import googleapiclient.discovery
 import googleapiclient.errors
 from urllib.parse import urlparse, parse_qs
@@ -32,46 +33,14 @@ if not os.path.exists('static/images'):
     os.makedirs('static/images')
 
 # Load your LSTM model
-model_lstm = None
-tokenizer = None
-translator = None
-lemmatizer = None
-stop_words = None
+model_lstm = load_model('lstm_sentiment_model.h5')
+with open('tokenizer.pickle', 'rb') as handle:
+    tokenizer = pickle.load(handle)
 
-
-def initialize_resources():
-    global model_lstm, tokenizer, translator, lemmatizer, stop_words
-
-    if model_lstm is None:
-        from tensorflow.keras.models import load_model
-        model_lstm = load_model("lstm_sentiment_model.h5")
-
-    if tokenizer is None:
-        import pickle
-        with open("tokenizer.pickle", "rb") as handle:
-            tokenizer = pickle.load(handle)
-
-    if translator is None:
-        from googletrans import Translator
-        translator = Translator()
-
-    if lemmatizer is None:
-        from nltk.stem import WordNetLemmatizer
-        lemmatizer = WordNetLemmatizer()
-
-    if stop_words is None:
-        from nltk.corpus import stopwords
-        stop_words = set(stopwords.words("english"))
-
-
-# model_lstm = load_model('lstm_sentiment_model.h5')
-# with open('tokenizer.pickle', 'rb') as handle:
-#     tokenizer = pickle.load(handle)
-
-# #utilities
-# translator = Translator()
-# lemmatizer = WordNetLemmatizer()
-# stop_words = set(stopwords.words('english'))
+#utilities
+translator = Translator()
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
 
 # Route for the homepage
 @app.route('/')
@@ -84,7 +53,6 @@ def about():
 
 @app.route('/submit_comment', methods=['POST'])
 def submit_comment():
-    initialize_resources()
     comment = request.form.get('comment')
     
     # Clean and preprocess the comment
@@ -117,8 +85,6 @@ def submit_comment():
 
 @app.route('/submit_url', methods=['POST'])
 def submit_url():
-    initialize_resources()
-    
     youtube_url = request.form.get('youtube_url')
     num_comments = int(request.form.get('num_comments', 100))
     min_comment_length = int(request.form.get('min_comment_length',10))
@@ -441,4 +407,5 @@ nltk.download('wordnet')
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
