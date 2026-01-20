@@ -84,5 +84,7 @@ Werkzeug==3.0.4
 wheel==0.44.0
 wordcloud==1.9.3
 wrapt==1.16.0
+beautifulsoup4==4.12.3
+lxml==5.3.0
 
 gunicorn
