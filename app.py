@@ -49,10 +49,25 @@ def get_model_and_tokenizer():
     
     return _model_lstm, _tokenizer
 
-#utilities
-translator = Translator()
-lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
+#utilities - lazy loaded
+_translator = None
+_lemmatizer = None
+_stop_words = None
+
+def get_utilities():
+    """Lazy load utilities on first use"""
+    global _translator, _lemmatizer, _stop_words
+    
+    if _translator is None:
+        _translator = Translator()
+    
+    if _lemmatizer is None:
+        _lemmatizer = WordNetLemmatizer()
+    
+    if _stop_words is None:
+        _stop_words = set(stopwords.words('english'))
+    
+    return _translator, _lemmatizer, _stop_words
 
 # Route for the homepage
 @app.route('/')
@@ -197,6 +212,7 @@ def fetch_video_details(youtube, video_id):
 
 def translate_to_english(comment):
     try:
+        translator, _, _ = get_utilities()
         translation = translator.translate(comment, src='hi', dest='en')
         return translation.text
     except Exception as e:
@@ -338,6 +354,7 @@ def clean_and_preprocess_comments(comment):
     # Tokenize
     tokens = word_tokenize(comment)
     # Remove stopwords and lemmatize
+    _, lemmatizer, stop_words = get_utilities()
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
     return ' '.join(tokens)
 
