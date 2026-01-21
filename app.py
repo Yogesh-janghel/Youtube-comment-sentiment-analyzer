@@ -32,10 +32,22 @@ max_seq_length = 100 # Parameters for padding
 if not os.path.exists('static/images'):
     os.makedirs('static/images')
 
-# Load your LSTM model
-model_lstm = load_model('lstm_sentiment_model.h5')
-with open('tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
+# Global variables for lazy loading
+_model_lstm = None
+_tokenizer = None
+
+def get_model_and_tokenizer():
+    """Lazy load the LSTM model and tokenizer on first use"""
+    global _model_lstm, _tokenizer
+    
+    if _model_lstm is None:
+        _model_lstm = load_model('lstm_sentiment_model.h5')
+    
+    if _tokenizer is None:
+        with open('tokenizer.pickle', 'rb') as handle:
+            _tokenizer = pickle.load(handle)
+    
+    return _model_lstm, _tokenizer
 
 #utilities
 translator = Translator()
@@ -57,6 +69,9 @@ def submit_comment():
     
     # Clean and preprocess the comment
     cleaned_comment = clean_and_preprocess_comments(comment)
+    
+    # Get model and tokenizer (lazy loaded)
+    model_lstm, tokenizer = get_model_and_tokenizer()
     
     # Tokenize and pad the cleaned comment
     new_sequence = tokenizer.texts_to_sequences([cleaned_comment])
@@ -101,6 +116,9 @@ def submit_url():
     video_title = fetch_video_details(youtube, video_id)
     df = fetch_comments(youtube, video_id, max_comments=num_comments, min_comment_length=min_comment_length)
 
+    # Get model and tokenizer (lazy loaded)
+    model_lstm, tokenizer = get_model_and_tokenizer()
+    
     # Perform sentiment analysis
     df = perform_sentiment_analysis(df, tokenizer, model_lstm, max_seq_length)
     
