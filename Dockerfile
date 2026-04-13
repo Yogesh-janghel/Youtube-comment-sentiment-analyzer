@@ -1,4 +1,4 @@
-# Use official Python 3.11 slim image (TensorFlow compatible)
+# Use official Python 3.11 slim image
 FROM python:3.11-slim
 
 # Prevent Python from writing .pyc files
@@ -13,7 +13,7 @@ ENV NLTK_DATA=/usr/local/nltk_data
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (required for TensorFlow, numpy, lxml, etc.)
+# Install system dependencies (required for numpy, lxml, etc.)
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -32,7 +32,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Download required NLTK resources at build time
-RUN python -m nltk.downloader stopwords wordnet punkt punkt_tab -d /usr/local/nltk_data
+RUN python -m nltk.downloader stopwords wordnet punkt punkt_tab omw-1.4 -d /usr/local/nltk_data
 
 # Copy the rest of the application code
 COPY . .
@@ -41,4 +41,5 @@ COPY . .
 EXPOSE 10000
 
 # Start the application with Gunicorn
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 120
+# Use 1 worker to minimize memory usage on free tier
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120

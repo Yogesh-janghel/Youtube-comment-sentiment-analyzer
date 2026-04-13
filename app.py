@@ -1,20 +1,16 @@
 import os
-# Suppress TensorFlow logging
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 import json
 import numpy as np
 from flask import Flask, request, render_template
 from dotenv import load_dotenv
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Import modularized logic
 from src.model_utils import (
-    get_model_and_tokenizer, 
     clean_and_preprocess_comments, 
     perform_sentiment_analysis, 
     calculate_overall_sentiment, 
-    prepare_top_comments
+    prepare_top_comments,
+    get_sentiment_vader
 )
 from src.youtube_utils import (
     get_youtube_client, 
@@ -31,7 +27,6 @@ app = Flask(__name__)
 
 # Configuration
 DEVELOPER_KEY = os.getenv("YOUTUBE_API_KEY")
-MAX_SEQ_LENGTH = 100
 
 # Ensure required directories exist
 for path in ['static/images', 'static/last_fetched']:
@@ -57,18 +52,20 @@ def submit_comment():
         return "No comment provided", 400
         
     cleaned_comment = clean_and_preprocess_comments(comment)
-    model_lstm, tokenizer = get_model_and_tokenizer()
     
-    # Predict sentiment
-    new_sequence = tokenizer.texts_to_sequences([cleaned_comment])
-    new_padded = pad_sequences(new_sequence, maxlen=MAX_SEQ_LENGTH)
-    lstm_pred = model_lstm.predict(new_padded, verbose=0)
-    
-    sentiment_score = np.argmax(lstm_pred)
-    confidence = float(lstm_pred[0][sentiment_score])
+    # Predict sentiment using VADER
+    sentiment_score, confidence = get_sentiment_vader(cleaned_comment)
     
     sentiment_labels = {0: "Negative", 1: "Neutral", 2: "Positive"}
     sentiment_label = sentiment_labels.get(sentiment_score, "Neutral")
+    
+    # Mock distribution for template compatibility
+    if sentiment_score == 2:
+        dist = [0, 0, 1]
+    elif sentiment_score == 0:
+        dist = [1, 0, 0]
+    else:
+        dist = [0, 1, 0]
     
     # Generate word cloud for the single comment
     wordcloud_path = 'static/images/comment_wordcloud.png'
@@ -77,9 +74,9 @@ def submit_comment():
     return render_template(
         'comment.html', 
         sentiment_label=sentiment_label, 
-        sentiment_score=f"{confidence:.2%}", 
+        sentiment_score=f"{abs(confidence):.2f}", 
         original_comment=comment, 
-        sentiment_distribution=lstm_pred[0], 
+        sentiment_distribution=dist, 
         wordcloud_image='/' + wordcloud_path
     )
 
@@ -107,8 +104,8 @@ def submit_url():
         if df.empty:
             return "No comments found for this video.", 404
 
-        # Perform sentiment analysis
-        df = perform_sentiment_analysis(df, MAX_SEQ_LENGTH)
+        # Perform sentiment analysis using VADER
+        df = perform_sentiment_analysis(df)
         
         # Calculate overall sentiment
         sentiment, _ = calculate_overall_sentiment(df)
@@ -152,11 +149,9 @@ def submit_url():
 
 @app.route('/last_fetched', methods=['POST'])
 def last_fetch_fucn():
-    # Attempt to load the "old" data as per original logic
     try:
         path = 'static/last_fetched/last_viewed_data_old.json'
         if not os.path.exists(path):
-            # Fallback to "new" if "old" doesn't exist
             path = 'static/last_fetched/last_viewed_data_new.json'
             
         with open(path, 'r') as f:
@@ -171,7 +166,6 @@ def last_fetch_fucn():
         video_id=data['video_id'],
         top_positive_comments=data['top_positive_comments'],
         top_negative_comments=data['top_negative_comments'],
-        # Use paths as defined in original template
         like_dist_image='/static/last_fetched/like_distribution.png',
         comment_corr_image='/static/last_fetched/comment_length_vs_likes.png',
         comment_activity_image='/static/last_fetched/comment_activity_over_time.png',

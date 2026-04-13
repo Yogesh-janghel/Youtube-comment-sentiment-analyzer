@@ -4,28 +4,20 @@ import pickle
 import warnings
 import numpy as np
 import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
-from langdetect import detect
-from googletrans import Translator
-from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 
-# Suppress BeautifulSoup warning
-warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
-
-# Ensure NLTK data is available
-# Check for environment variable set in Docker
+# Initialize NLTK data path at the very beginning
 nltk_data_path = os.getenv('NLTK_DATA', '/usr/local/nltk_data')
 if nltk_data_path not in nltk.data.path:
-    nltk.data.path.append(nltk_data_path)
+    nltk.data.path.insert(0, nltk_data_path)
 
+# Download resources before importing sub-packages
 def ensure_nltk_resources():
-    resources = ['stopwords', 'wordnet', 'punkt', 'punkt_tab']
+    # 'punkt' is essential for word_tokenize
+    # 'punkt_tab' is used in newer NLTK versions
+    resources = ['stopwords', 'wordnet', 'punkt', 'punkt_tab', 'omw-1.4']
     for res in resources:
         try:
+            # Simple check if data exists
             if res == 'stopwords':
                 nltk.data.find('corpora/stopwords')
             elif res == 'wordnet':
@@ -34,32 +26,37 @@ def ensure_nltk_resources():
                 nltk.data.find('tokenizers/punkt')
             elif res == 'punkt_tab':
                 nltk.data.find('tokenizers/punkt_tab')
+            elif res == 'omw-1.4':
+                nltk.data.find('corpora/omw-1.4')
         except LookupError:
-            nltk.download(res)
+            print(f"NLTK Resource {res} not found, downloading...")
+            nltk.download(res, download_dir=nltk_data_path)
 
 ensure_nltk_resources()
 
-# Paths
-MODELS_DIR = os.path.join(os.path.dirname(__file__), '..', 'models')
-MODEL_PATH = os.path.join(MODELS_DIR, 'lstm_sentiment_model.h5')
-TOKENIZER_PATH = os.path.join(MODELS_DIR, 'tokenizer.pickle')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from langdetect import detect
+from googletrans import Translator
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+# Suppress BeautifulSoup warning
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 # Global variables for lazy loading
-_model_lstm = None
-_tokenizer = None
+_analyzer = None
 _translator = None
 _lemmatizer = None
 _stop_words = None
 
-def get_model_and_tokenizer():
-    """Lazy load the LSTM model and tokenizer on first use"""
-    global _model_lstm, _tokenizer
-    if _model_lstm is None:
-        _model_lstm = load_model(MODEL_PATH)
-    if _tokenizer is None:
-        with open(TOKENIZER_PATH, 'rb') as handle:
-            _tokenizer = pickle.load(handle)
-    return _model_lstm, _tokenizer
+def get_analyzer():
+    """Lazy load VADER analyzer"""
+    global _analyzer
+    if _analyzer is None:
+        _analyzer = SentimentIntensityAnalyzer()
+    return _analyzer
 
 def get_utilities():
     """Lazy load utilities on first use"""
@@ -111,22 +108,32 @@ def clean_and_preprocess_comments(comment):
     tokens = [lemmatizer.lemmatize(word) for word in tokens if word not in stop_words]
     return ' '.join(tokens)
 
-def perform_sentiment_analysis(df, max_seq_length=100):
-    model_lstm, tokenizer = get_model_and_tokenizer()
+def get_sentiment_vader(text):
+    analyzer = get_analyzer()
+    score = analyzer.polarity_scores(text)
+    compound = score['compound']
     
+    # Map compound score to 0 (Neg), 1 (Neu), 2 (Pos)
+    if compound >= 0.05:
+        return 2, compound
+    elif compound <= -0.05:
+        return 0, compound
+    else:
+        return 1, compound
+
+def perform_sentiment_analysis(df, max_seq_length=None):
     # Clean and preprocess comments
     df['cleaned_text'] = df['text'].apply(clean_and_preprocess_comments)
     
     sentiments = []
-    # Vectorized approach is better, but keeping logic consistent for now
+    compounds = []
     for text in df['cleaned_text']:
-        new_sequence = tokenizer.texts_to_sequences([text])
-        new_padded = pad_sequences(new_sequence, maxlen=max_seq_length)
-        lstm_pred = model_lstm.predict(new_padded, verbose=0)
-        sentiment_score = np.argmax(lstm_pred)
-        sentiments.append(sentiment_score)
+        label, score = get_sentiment_vader(text)
+        sentiments.append(label)
+        compounds.append(score)
     
     df['sentiment'] = sentiments
+    df['sentiment_score'] = compounds
     return df
 
 def calculate_overall_sentiment(df):
