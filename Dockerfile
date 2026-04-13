@@ -41,4 +41,4 @@ COPY . .
 EXPOSE 10000
 
 # Start the application with Gunicorn
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120
+CMD sh -c "gunicorn app:app --bind 0.0.0.0:${PORT:-10000} --timeout 120"
