@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>YouTube Comment Sentiment</title>
+    <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Animation styles */
@@ -29,13 +30,21 @@
 <body class="bg-gray-900 text-white min-h-screen">
     <nav class="bg-gray-800 p-6 flex justify-between items-center">
         <div class="flex items-center space-x-2">
-            <img src="../static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
+            <img src="/static/images/youtube.svg" alt="Logo" class="h-10 w-10" />
             <span class="text-2xl font-bold">YouTube Comment Sentiment Analyzer</span>
         </div>
         <div class="flex space-x-8 text-lg font-semibold ml-auto">
-            <a href="/" class="hover:text-red-500 hover:underline transition duration-200">Home</a>
-            <a href="/how_it_works" class="hover:text-red-500 hover:underline transition duration-200">How It Works</a>
-            <a href="/about" class="hover:text-red-500 hover:underline transition duration-200">About</a>
+            <button class="btn" onclick="window.location.href='/'">
+                Home
+            </button>
+
+            <button class="btn" onclick="window.location.href='/how_it_works'">
+                How It Works
+            </button>
+
+            <button class="btn" onclick="window.location.href='/about'">
+                About
+            </button>
         </div>
     </nav>
 
@@ -43,17 +52,17 @@
     <div id="main-content" class="flex flex-col items-center mt-10 space-y-8 w-full">
         <!-- Comment Input with Submit Button (Side-by-Side) -->
         <form action="/submit_comment" method="POST" class="w-3/4 flex items-center space-x-4">
-            <input type="text" name="comment" placeholder="Enter a comment for sentiment analysis" class="flex-grow p-4 bg-gray-700 text-white rounded-full focus:outline-none" />
-            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-semibold px-8 py-4 rounded-full">Submit Comment</button>
+            <input type="text" name="comment" placeholder="Enter a comment for sentiment analysis" class="input-text" />
+            <button type="submit" class="submit-button">Submit Comment</button>
         </form>
 
         <form action="/submit_url" method="POST" class="w-3/4 space-y-8">
             <!-- YouTube URL Input with Submit URL Button (Side-by-Side) -->
             <div class="flex items-center space-x-4">
                 <input type="text" name="youtube_url" placeholder="Paste YouTube video URL"
-                    class="flex-grow p-4 rounded-full bg-gray-700 placeholder-gray-400 focus:outline-none" />
+                    class="input-text" />
                 <button type="submit"
-                    class="bg-red-500 hover:bg-red-600 text-white font-semibold px-[53px] py-4 rounded-full">
+                    class="submit-button">
                     Submit URL
                 </button>
             </div>
@@ -84,7 +93,7 @@
 
         <!-- Last Fetched Button -->
         <form action="/last_fetched" method="POST" class="w-3/4 flex justify-center mt-4">
-            <button class="bg-red-500 hover:bg-red-600 text-white font-bold px-10 py-5 rounded-full">
+            <button class="last-button">
                 Last Fetched
             </button>
         </form>
@@ -93,10 +102,18 @@
         <div class="w-3/4 flex-grow"></div>
     </div>
      <!-- Loading Screen -->
-    <div id="loadingScreen" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center min-h-screen">
+    <!-- <div id="loadingScreen" class="hidden fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center min-h-screen">
         <img src="/static/images/spinner.svg" alt="Loading..." class="w-16 h-16">
         <p class="text-white text-xl ml-4">Loading, please wait...</p>
-    </div>
+    </div> -->
+
+        <div id="loadingScreen" class="fixed inset-0 flex flex-col items-center justify-center z-50">
+        <div class="loader"></div>
+        <p class="text-white text-xl mt-4">Loading, please wait...</p>
+        </div>
+
+
+
     <script>
         // Trigger fade-in animation when the page is loaded
         window.addEventListener('load', function () {

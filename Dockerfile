@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Ensure stdout/stderr are flushed immediately
 ENV PYTHONUNBUFFERED=1
 
-# Set NLTK data directory (important for Render)
+# Set NLTK data directory
 ENV NLTK_DATA=/usr/local/nltk_data
 
 # Set working directory
