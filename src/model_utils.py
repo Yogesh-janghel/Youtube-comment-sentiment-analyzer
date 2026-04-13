@@ -17,18 +17,27 @@ from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 # Ensure NLTK data is available
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords')
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-try:
-    nltk.data.find('corpora/wordnet')
-except LookupError:
-    nltk.download('wordnet')
+# Check for environment variable set in Docker
+nltk_data_path = os.getenv('NLTK_DATA', '/usr/local/nltk_data')
+if nltk_data_path not in nltk.data.path:
+    nltk.data.path.append(nltk_data_path)
+
+def ensure_nltk_resources():
+    resources = ['stopwords', 'wordnet', 'punkt', 'punkt_tab']
+    for res in resources:
+        try:
+            if res == 'stopwords':
+                nltk.data.find('corpora/stopwords')
+            elif res == 'wordnet':
+                nltk.data.find('corpora/wordnet')
+            elif res == 'punkt':
+                nltk.data.find('tokenizers/punkt')
+            elif res == 'punkt_tab':
+                nltk.data.find('tokenizers/punkt_tab')
+        except LookupError:
+            nltk.download(res)
+
+ensure_nltk_resources()
 
 # Paths
 MODELS_DIR = os.path.join(os.path.dirname(__file__), '..', 'models')

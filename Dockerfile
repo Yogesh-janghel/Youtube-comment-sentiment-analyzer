@@ -32,7 +32,7 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # Download required NLTK resources at build time
-RUN python -m nltk.downloader stopwords wordnet punkt
+RUN python -m nltk.downloader stopwords wordnet punkt punkt_tab -d /usr/local/nltk_data
 
 # Copy the rest of the application code
 COPY . .
@@ -41,4 +41,4 @@ COPY . .
 EXPOSE 10000
 
 # Start the application with Gunicorn
-CMD sh -c "gunicorn app:app --bind 0.0.0.0:${PORT:-10000} --timeout 120"
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 1 --timeout 120
